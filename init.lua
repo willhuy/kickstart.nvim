@@ -250,7 +250,36 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  --'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  {
+    'NMAC427/guess-indent.nvim',
+    opts = {
+      auto_cmd = true,
+      override_editorconfig = false,
+      filetype_exclude = {},
+      buftype_exclude = {},
+      default_indent = {
+        tabstop = 4,
+        shiftwidth = 4,
+        expandtab = true,
+      },
+    },
+    config = function(_, opts)
+      require('guess-indent').setup(opts)
+
+      -- Override for C files to force 4-space indentation
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = 'c',
+        callback = function()
+          vim.b.guess_indent_done = true -- Disable auto-guess for this buffer
+          vim.bo.expandtab = true
+          vim.bo.tabstop = 4
+          vim.bo.shiftwidth = 4
+          vim.bo.softtabstop = 4
+        end,
+      })
+    end,
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
